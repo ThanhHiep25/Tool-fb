@@ -1,0 +1,19 @@
+{
+  "rules": [
+    {
+      "keywords": ["giá", "bao nhiêu", "đắt"],
+      "response": "Chào bạn, sản phẩm này có giá 250k. Bạn có thể tham khảo chi tiết tại đây: [link sản phẩm].",
+      "active": true
+    },
+    {
+      "keywords": ["còn hàng", "hết hàng"],
+      "response": "Chào bạn, sản phẩm này vẫn còn hàng. Vui lòng để lại thông tin để chúng tôi hỗ trợ bạn nhanh nhất nhé!",
+      "active": true
+    },
+    {
+      "keywords": ["mua", "đặt hàng"],
+      "response": "Chào bạn, bạn muốn đặt sản phẩm nào ạ? Bạn có thể inbox trực tiếp cho page để được hỗ trợ nhanh nhất nhé.",
+      "active": true
+    }
+  ]
+}

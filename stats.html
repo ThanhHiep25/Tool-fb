@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê tổng quan</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --secondary-color: #f0f2f5;
+            --text-color: #333;
+            --secondary-text: #666;
+            --card-bg: #fff;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.8rem; margin-top: 2rem; margin-bottom: 1rem; }
+
+        .nav-links {
+            text-align: center;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-size: 1rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            padding: 12px 25px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls > div {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #stats-loading { 
+            text-align: center; 
+            margin-top: 20px; 
+            font-style: italic; 
+            color: var(--secondary-text); 
+            display: none; 
+        }
+
+        #stats-chart-container { 
+            margin-top: 30px; 
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-links { 
+            text-align: center; 
+            margin-bottom: 20px; 
+        }
+        
+        .nav-links a { 
+            text-decoration: none; 
+            font-size: 18px; 
+            color: #007bff; 
+            font-weight: bold; 
+            padding: 10px 20px; 
+            border: 2px solid #007bff; 
+            border-radius: 5px; 
+            transition: background-color 0.3s; 
+        }
+        
+        .nav-links a:hover { 
+            background-color: #007bff; 
+            color: white; 
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Công cụ quản lý Fanpage</h1>
+        <div class="nav-links">
+            <a href="index.html">Phân Tích Bài Viết</a>
+            <a href="schedule.html">Lên lịch và Quản lý</a>
+        </div>
+        <hr>
+        <div class="statistics">
+            <h2>Thống Kê Tổng Quan</h2>
+            <div class="controls">
+                <div>
+                    <label for="period-select">Thống kê theo:</label>
+                    <select id="period-select">
+                        <option value="day">Ngày</option>
+                        <option value="week">Tuần</option>
+                        <option value="month">Tháng</option>
+                        <option value="year">Năm</option>
+                    </select>
+                </div>
+            </div>
+            <button id="stats-btn">Xem Thống Kê</button>
+            <p id="stats-loading">Đang tải dữ liệu, vui lòng chờ...</p>
+        </div>
+
+        <div id="stats-chart-container" style="display: none;">
+            <canvas id="statsChart"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        const statsBtn = document.getElementById('stats-btn');
+        const periodSelect = document.getElementById('period-select');
+        const statsLoadingText = document.getElementById('stats-loading');
+        const statsChartContainer = document.getElementById('stats-chart-container');
+        let myStatsChart;
+
+        statsBtn.addEventListener('click', async () => {
+            statsBtn.disabled = true;
+            statsLoadingText.style.display = 'block';
+            statsChartContainer.style.display = 'none';
+            if(myStatsChart) myStatsChart.destroy();
+
+            const period = periodSelect.value;
+            try {
+                const response = await fetch(`/analyze-by-period?period=${period}`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    const labels = Object.keys(result);
+                    const likesData = labels.map(key => result[key].likes);
+                    const commentsData = labels.map(key => result[key].comments);
+                    const sharesData = labels.map(key => result[key].shares);
+                    const postsData = labels.map(key => result[key].posts);
+                    const impressionsData = labels.map(key => result[key].impressions);
+                    const videoViewsData = labels.map(key => result[key].video_views);
+
+                    if (labels.length > 0) {
+                        statsChartContainer.style.display = 'block';
+                        const ctx = document.getElementById('statsChart').getContext('2d');
+                        myStatsChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Tổng số Bài viết',
+                                    data: postsData,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1
+                                }, {
+                                    label: 'Tổng lượt Thích',
+                                    data: likesData,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }, {
+                                    label: 'Tổng Bình luận',
+                                    data: commentsData,
+                                    backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                                    borderColor: 'rgba(255, 206, 86, 1)',
+                                    borderWidth: 1
+                                }, {
+                                    label: 'Tổng Chia sẻ',
+                                    data: sharesData,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1
+                                }, {
+                                    label: 'Tổng Lượt tiếp cận (Impressions)',
+                                    data: impressionsData,
+                                    backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                                    borderColor: 'rgba(153, 102, 255, 1)',
+                                    borderWidth: 1
+                                }, {
+                                    label: 'Tổng Lượt xem Video',
+                                    data: videoViewsData,
+                                    backgroundColor: 'rgba(255, 159, 64, 0.5)',
+                                    borderColor: 'rgba(255, 159, 64, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: { stacked: true },
+                                    y: { stacked: true, beginAtZero: true }
+                                },
+                                plugins: {
+                                    title: { display: true, text: `Tổng hợp tương tác theo ${period}` }
+                                }
+                            }
+                        });
+                    } else {
+                        statsChartContainer.style.display = 'block';
+                        statsChartContainer.innerHTML = '<p style="text-align:center;">Không có dữ liệu để hiển thị.</p>';
+                    }
+                } else {
+                    statsChartContainer.style.display = 'block';
+                    statsChartContainer.innerHTML = `<p style="color: red; text-align:center;">Lỗi: ${result.error}</p>`;
+                }
+            } catch (error) {
+                statsChartContainer.style.display = 'block';
+                statsChartContainer.innerHTML = `<p style="color: red; text-align:center;">Lỗi kết nối: ${error.message}</p>`;
+            } finally {
+                statsBtn.disabled = false;
+                statsLoadingText.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

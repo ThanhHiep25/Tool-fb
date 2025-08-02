@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lên lịch và Quản lý Bài viết</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #333;
+            --secondary-text-color: #555;
+            --border-color: #e0e0e0;
+            --bg-color: #f8f9fa;
+            --card-bg-color: #ffffff;
+            --shadow: 0 4px 15px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 40px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 30px 0;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-size: 16px;
+            color: var(--primary-color);
+            font-weight: bold;
+            padding: 10px 25px;
+            border: 2px solid var(--primary-color);
+            border-radius: 25px;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        form > div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--secondary-text-color);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color var(--transition);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover-color);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #cancel-edit-btn {
+            background-color: #6c757d;
+            margin-left: 10px;
+        }
+
+        #cancel-edit-btn:hover {
+            background-color: #5a6268;
+        }
+
+        #scheduler-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .scheduled-posts-list {
+            margin-top: 25px;
+        }
+
+        .scheduled-post-item {
+            border: 1px solid var(--border-color);
+            background-color: #fefefe;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .post-details {
+            flex-grow: 1;
+            margin-right: 20px;
+            min-width: 250px;
+        }
+
+        .scheduled-post-item p {
+            margin: 5px 0;
+        }
+
+        .post-status {
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-right: 10px;
+            display: inline-block;
+        }
+        
+        .status-scheduled {
+            background-color: var(--warning-color);
+            color: #333;
+        }
+        
+        .status-posted {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .actions button {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .actions .edit-btn {
+            background-color: var(--warning-color);
+            color: black;
+        }
+
+        .actions .edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .actions .delete-btn {
+            background-color: var(--danger-color);
+        }
+
+        .actions .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .management-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .management-controls input, .management-controls select {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px auto;
+            }
+            .nav-links a {
+                width: 100%;
+                display: block;
+                box-sizing: border-box;
+            }
+            .management-controls, .scheduled-post-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .post-details {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .actions {
+                width: 100%;
+                justify-content: center;
+            }
+            .actions button {
+                flex: 1;
+            }
+        }
+
+        /* CSS MỚI CHO PHẦN TẢI ẢNH */
+        .image-upload-container {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color var(--transition);
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary-color);
+        }
+
+        .image-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .image-upload-label svg {
+            color: var(--secondary-text-color);
+            transition: color var(--transition);
+        }
+
+        .image-upload-container:hover .image-upload-label svg {
+            color: var(--primary-color);
+        }
+
+        .upload-text {
+            color: var(--secondary-text-color);
+            font-size: 1em;
+            transition: color var(--transition);
+        }
+
+        .image-upload-container:hover .upload-text {
+            color: var(--primary-color);
+        }
+
+        .upload-text u {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        .image-preview-container {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Công cụ quản lý Fanpage</h1>
+        <div class="nav-links">
+            <a href="index.html">Đi đến trang Phân Tích Bài Viết</a>
+        </div>
+        <hr>
+        <div class="scheduler">
+            <h2>Lên Lịch Đăng Bài Mới</h2>
+            <form id="post-form">
+                <div>
+                    <label for="schedule-message">Nội dung bài viết:</label>
+                    <textarea id="schedule-message" name="message" placeholder="Nhập nội dung bài viết vào đây..."></textarea>
+                </div>
+                <div class="image-upload-container">
+                    <label class="image-upload-label" for="schedule-image">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-cloud-upload" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M4.406 1.342A5.53 5.53 0 0 1 9.828 0c3.148 0 5.735 2.104 5.735 4.646 0 2.062-1.58 3.708-3.794 3.708-1.38-0-2.479-0.75-2.819-1.5C9.83 7.6 9.1 8.5 8.5 9.5a5.5 5.5 0 0 1-4.97-2.317l0.3 0.3a4.5 4.5 0 0 0 4.096 1.958c2.73 0 4.95-1.87 4.95-4.144 0-1.74-1.194-3.17-2.908-3.17-1.272 0-2.215 0.79-2.56 1.69A3.72 3.72 0 0 0 2.743 4.56 0.86 0.86 0 0 0 2 5.005V13h8.002v-0.64L8.418 9.886a5.502 5.502 0 0 1 2.717 0.407c3.084-0.28 5.425-2.87 5.425-5.984 0-3.178-2.577-5.782-5.76-5.782C4.159-0.008 0.818 2.686 0.818 5.888c0 3.052 2.283 5.45 5.203 5.45H13V13a0.81 0.81 0 0 0 0.157 0.002l0.5 0.008a0.85 0.85 0 0 0 0.676-0.322L15.192 10.3a0.797 0.797 0 0 0-0.018-1.024l-4.843-3.13A5.5 5.5 0 0 1 4.406 1.342z"/>
+                        </svg>
+                        <span class="upload-text">Kéo và thả ảnh vào đây hoặc <u>chọn từ máy tính</u></span>
+                        <input type="file" id="schedule-image" name="image" accept="image/*" class="hidden-input">
+                    </label>
+                    <div id="image-preview" class="image-preview-container"></div>
+                </div>
+                <div>
+                    <label for="schedule-time">Thời gian đăng:</label>
+                    <input type="datetime-local" id="schedule-time" name="scheduleTime">
+                </div>
+                <input type="hidden" id="post-id-to-edit" name="postId">
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="schedule-btn">Lên Lịch</button>
+                    <button type="button" id="cancel-edit-btn" style="display:none;">Hủy Chỉnh Sửa</button>
+                </div>
+            </form>
+            <p id="scheduler-status"></p>
+        </div>
+
+        <hr>
+        <div class="scheduled-posts">
+            <h2>Bài Viết Đã Lên Lịch</h2>
+            <div class="management-controls">
+                <input type="text" id="search-scheduled-posts" placeholder="Tìm kiếm bài viết...">
+                <select id="sort-scheduled-posts">
+                    <option value="time_desc">Sắp xếp: Mới nhất</option>
+                    <option value="time_asc">Sắp xếp: Cũ nhất</option>
+                </select>
+            </div>
+            <div id="scheduled-posts-container" class="scheduled-posts-list">
+                <p>Không có bài viết nào đã được lên lịch.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scheduleBtn = document.getElementById('schedule-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const postForm = document.getElementById('post-form');
+        const scheduleMessageArea = document.getElementById('schedule-message');
+        const scheduleImageInput = document.getElementById('schedule-image');
+        const postIdToEditInput = document.getElementById('post-id-to-edit');
+        const schedulerStatus = document.getElementById('scheduler-status');
+        const scheduledPostsContainer = document.getElementById('scheduled-posts-container');
+        const searchInput = document.getElementById('search-scheduled-posts');
+        const sortSelect = document.getElementById('sort-scheduled-posts');
+        const scheduleTimeInput = document.getElementById('schedule-time');
+
+        // JS MỚI CHO PHẦN TẢI ẢNH
+        const imageUploadContainer = document.querySelector('.image-upload-container');
+        const imagePreviewContainer = document.getElementById('image-preview');
+        
+        scheduleImageInput.addEventListener('change', handleImageUpload);
+        imageUploadContainer.addEventListener('dragover', handleDragOver);
+        imageUploadContainer.addEventListener('drop', handleDrop);
+
+        function handleImageUpload() {
+            const files = this.files;
+            displayImagePreview(files);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            imageUploadContainer.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            imageUploadContainer.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            scheduleImageInput.files = files;
+            displayImagePreview(files);
+        }
+
+        function displayImagePreview(files) {
+            imagePreviewContainer.innerHTML = '';
+            for (const file of files) {
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.createElement('div');
+                        preview.className = 'image-preview';
+                        preview.innerHTML = `<img src="${e.target.result}" alt="${file.name}">`;
+                        imagePreviewContainer.appendChild(preview);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+            if (files.length > 0) {
+                imageUploadContainer.classList.add('has-image');
+            } else {
+                imageUploadContainer.classList.remove('has-image');
+            }
+        }
+        // KẾT THÚC JS MỚI
+
+        async function renderScheduledPosts() {
+            const query = searchInput.value;
+            const sortBy = sortSelect.value;
+            try {
+                const response = await fetch(`/get-scheduled-posts?query=${encodeURIComponent(query)}&sortBy=${sortBy}`);
+                const posts = await response.json();
+                
+                if (posts.length > 0) {
+                    scheduledPostsContainer.innerHTML = '';
+                    posts.forEach(post => {
+                        const postItem = document.createElement('div');
+                        postItem.className = 'scheduled-post-item';
+                        
+                        const statusClass = post.status === 'posted' ? 'status-posted' : 'status-scheduled';
+                        const statusText = post.status === 'posted' ? 'Đã Đăng' : 'Đã Lên Lịch';
+                        const statusHtml = `<span class="post-status ${statusClass}">${statusText}</span>`;
+
+                        const actionsHtml = `
+                            <div class="actions">
+                                ${post.status === 'scheduled' ? `
+                                    <button class="edit-btn" data-post='${JSON.stringify(post)}'>Sửa</button>
+                                ` : ''}
+                                <button class="delete-btn" data-post-id="${post.id}">Xóa</button>
+                            </div>
+                        `;
+
+                        postItem.innerHTML = `
+                            <div class="post-details">
+                                <p>
+                                    ${statusHtml}
+                                    <strong>Nội dung:</strong> ${post.message ? post.message.substring(0, 100) + (post.message.length > 100 ? '...' : '') : 'Không có nội dung'}
+                                </p>
+                                <p><strong>Thời gian:</strong> ${new Date(post.scheduleTime).toLocaleString()}</p>
+                            </div>
+                            ${actionsHtml}
+                        `;
+                        postItem.querySelector('.edit-btn')?.addEventListener('click', (e) => {
+                            const postData = JSON.parse(e.target.dataset.post);
+                            scheduleMessageArea.value = postData.message;
+                            scheduleTimeInput.value = new Date(postData.scheduleTime).toISOString().slice(0, 16);
+                            postIdToEditInput.value = postData.id;
+                            
+                            scheduleBtn.innerText = 'Cập Nhật';
+                            cancelEditBtn.style.display = 'block';
+                            schedulerStatus.innerText = `Đang chỉnh sửa bài viết ID: ${postData.id}`;
+                            
+                            // Clear image preview when editing
+                            imagePreviewContainer.innerHTML = '';
+                            if(postData.imageUrl) {
+                                const preview = document.createElement('div');
+                                preview.className = 'image-preview';
+                                preview.innerHTML = `<img src="${postData.imageUrl}" alt="Đã có ảnh">`;
+                                imagePreviewContainer.appendChild(preview);
+                            }
+                        });
+                        postItem.querySelector('.delete-btn')?.addEventListener('click', async (e) => {
+                            const postId = e.target.dataset.postId;
+                            const postStatus = e.target.closest('.scheduled-post-item').querySelector('.post-status').innerText;
+                            
+                            const confirmMessage = postStatus === 'Đã Đăng' 
+                                                ? 'Bạn có chắc chắn muốn xóa bài viết này trên cả Fanpage Facebook và khỏi danh sách không?'
+                                                : 'Bạn có chắc chắn muốn xóa bài viết đã lên lịch này không?';
+
+                            if (confirm(confirmMessage)) {
+                                e.target.disabled = true;
+                                try {
+                                    const deleteResponse = await fetch(`/delete-scheduled-post/${postId}`, {
+                                        method: 'DELETE'
+                                    });
+                                    if (deleteResponse.ok) {
+                                        alert('Đã xóa bài viết thành công!');
+                                        renderScheduledPosts();
+                                    } else {
+                                        const errorData = await deleteResponse.json();
+                                        alert('Lỗi khi xóa bài viết: ' + errorData.error);
+                                    }
+                                } catch (error) {
+                                    alert('Lỗi kết nối khi xóa bài viết.');
+                                } finally {
+                                    e.target.disabled = false;
+                                }
+                            }
+                        });
+                        scheduledPostsContainer.appendChild(postItem);
+                    });
+                } else {
+                    scheduledPostsContainer.innerHTML = '<p>Không có bài viết nào đã được lên lịch.</p>';
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách bài viết đã lên lịch:', error);
+                scheduledPostsContainer.innerHTML = '<p>Lỗi khi tải danh sách.</p>';
+            }
+        }
+        
+        postForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = scheduleMessageArea.value;
+            const scheduleTime = scheduleTimeInput.value;
+            const imageFile = scheduleImageInput.files[0];
+            const postId = postIdToEditInput.value;
+
+            if (!message && !imageFile) {
+                schedulerStatus.style.color = 'red';
+                schedulerStatus.innerText = 'Vui lòng nhập nội dung hoặc chọn hình ảnh.';
+                return;
+            }
+            if (!scheduleTime) {
+                schedulerStatus.style.color = 'red';
+                schedulerStatus.innerText = 'Vui lòng chọn thời gian đăng bài.';
+                return;
+            }
+            const scheduledDate = new Date(scheduleTime);
+            if (scheduledDate < new Date()) {
+                schedulerStatus.style.color = 'red';
+                schedulerStatus.innerText = 'Thời gian lên lịch phải ở tương lai.';
+                return;
+            }
+
+            schedulerStatus.style.color = 'blue';
+            schedulerStatus.innerText = 'Đang xử lý...';
+            scheduleBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('message', message);
+            formData.append('scheduleTime', scheduleTime);
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            let url = '/schedule-post';
+            let method = 'POST';
+            if (postId) {
+                url = `/edit-scheduled-post/${postId}`;
+                method = 'PUT';
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    schedulerStatus.style.color = 'green';
+                    schedulerStatus.innerText = postId ? 'Bài viết đã được cập nhật thành công!' : `Bài viết đã được lên lịch thành công vào lúc: ${new Date(result.scheduled_time).toLocaleString()}`;
+                    postForm.reset();
+                    postIdToEditInput.value = '';
+                    scheduleBtn.innerText = 'Lên Lịch';
+                    cancelEditBtn.style.display = 'none';
+                    imagePreviewContainer.innerHTML = ''; // Clear preview after successful submission
+                    renderScheduledPosts();
+                } else {
+                    schedulerStatus.style.color = 'red';
+                    schedulerStatus.innerText = `Lỗi: ${result.error}`;
+                }
+            } catch (error) {
+                schedulerStatus.style.color = 'red';
+                schedulerStatus.innerText = `Lỗi kết nối: ${error.message}`;
+            } finally {
+                scheduleBtn.disabled = false;
+            }
+        });
+
+        cancelEditBtn.addEventListener('click', () => {
+            postForm.reset();
+            postIdToEditInput.value = '';
+            scheduleBtn.innerText = 'Lên Lịch';
+            cancelEditBtn.style.display = 'none';
+            schedulerStatus.innerText = '';
+            imagePreviewContainer.innerHTML = ''; // Clear preview on cancel
+        });
+
+        document.addEventListener('DOMContentLoaded', renderScheduledPosts);
+        searchInput.addEventListener('input', renderScheduledPosts);
+        sortSelect.addEventListener('change', renderScheduledPosts);
+    </script>
+</body>
+</html>
